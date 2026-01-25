@@ -161,7 +161,6 @@ def book_add_finished(title: str, date: str, book_id: str | None = None) -> dict
     r = httpx.post(url, json=payload, timeout=10.0)
     r.raise_for_status()
     return {"ok": True, "book": r.json()}
-json()}
     
 @mcp.tool
 def book_delete_finished(book_id: str) -> dict:
@@ -201,6 +200,7 @@ def crochet_get():
 
 
 app.mount("/mcp", mcp_app)
+
 
 
 
