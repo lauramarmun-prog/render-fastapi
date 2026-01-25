@@ -1,5 +1,8 @@
 import os
 from typing import Dict, Any, List, Optional
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 
 import httpx
 from fastapi import FastAPI
@@ -45,6 +48,19 @@ def list_items() -> List[Dict[str, Any]]:
     res = _db().table(TABLE).select("id,title,status,notes").execute()
     return res.data or []
 
+def get_time_context() -> Dict[str, Any]:
+    tz = ZoneInfo("Europe/Amsterdam")
+    now = datetime.now(tz)
+
+    return {
+        "current_time": now.strftime("%H:%M"),
+        "date": now.strftime("%Y-%m-%d"),
+        "weekday": now.strftime("%A"),
+        "timezone": "Europe/Amsterdam",
+        "iso": now.isoformat()
+    }
+
+
 
 # ---------- MCP ----------
 mcp = FastMCP("Lilazul MCP")
@@ -52,6 +68,9 @@ mcp = FastMCP("Lilazul MCP")
 # Si algún día cambias el backend de tu app, lo puedes apuntar aquí sin tocar código:
 LILAZUL_API_BASE = os.getenv("LILAZUL_API_BASE", "https://lilazul-api.onrender.com")
 
+@mcp.context
+def time_context():
+    return get_time_context()
 
 @mcp.tool
 def ping() -> dict:
@@ -131,3 +150,4 @@ def crochet_get():
 
 
 app.mount("/mcp", mcp_app)
+
