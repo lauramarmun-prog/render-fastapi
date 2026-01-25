@@ -120,6 +120,49 @@ def crochet_toggle(id: str) -> dict:
     except Exception:
         data = None
     return {"ok": True, "id": id, "api_status": r.status_code, "response": data}
+    
+@mcp.tool
+def crochet_delete(item_id: str) -> dict:
+    url = f"{LILAZUL_API_BASE}/crochet/{item_id}"
+    r = httpx.delete(url, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "id": item_id}
+
+@mcp.tool
+def book_get_current() -> dict:
+    url = f"{LILAZUL_API_BASE}/current-book"
+    r = httpx.get(url, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "book": r.json()}
+@mcp.tool
+def book_set_current(title: str, author: str | None = None) -> dict:
+    payload = {"title": title, "author": author}
+    url = f"{LILAZUL_API_BASE}/current-book"
+    r = httpx.post(url, json=payload, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "book": r.json()}
+@mcp.tool
+def book_list_finished() -> dict:
+    url = f"{LILAZUL_API_BASE}/finished-books"
+    r = httpx.get(url, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "books": r.json()}
+    
+@mcp.tool
+def book_add_finished(title: str, author: str | None = None) -> dict:
+    payload = {"title": title, "author": author}
+    url = f"{LILAZUL_API_BASE}/finished-books"
+    r = httpx.post(url, json=payload, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "book": r.json()}
+    
+@mcp.tool
+def book_delete_finished(book_id: str) -> dict:
+    url = f"{LILAZUL_API_BASE}/finished-books/{book_id}"
+    r = httpx.delete(url, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "id": book_id}
+
 
 
 # ---------- FastAPI ----------
@@ -151,5 +194,6 @@ def crochet_get():
 
 
 app.mount("/mcp", mcp_app)
+
 
 
