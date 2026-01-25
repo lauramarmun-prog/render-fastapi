@@ -68,9 +68,10 @@ mcp = FastMCP("Lilazul MCP")
 # Si algún día cambias el backend de tu app, lo puedes apuntar aquí sin tocar código:
 LILAZUL_API_BASE = os.getenv("LILAZUL_API_BASE", "https://lilazul-api.onrender.com")
 
-@mcp.context
-def time_context():
+@mcp.tool
+def get_time() -> dict:
     return get_time_context()
+
 
 @mcp.tool
 def ping() -> dict:
@@ -150,4 +151,5 @@ def crochet_get():
 
 
 app.mount("/mcp", mcp_app)
+
 
