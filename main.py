@@ -3,6 +3,8 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from uuid import uuid4
+import httpx
 
 import httpx
 from fastapi import FastAPI
@@ -147,14 +149,19 @@ def book_list_finished() -> dict:
     r = httpx.get(url, timeout=10.0)
     r.raise_for_status()
     return {"ok": True, "books": r.json()}
-    
+
 @mcp.tool
-def book_add_finished(title: str, author: str | None = None) -> dict:
-    payload = {"title": title, "author": author}
+def book_add_finished(title: str, date: str, book_id: str | None = None) -> dict:
+    payload = {
+        "id": book_id or str(uuid4()),
+        "title": title,
+        "date": date,  # formato recomendado: "2025-10-07"
+    }
     url = f"{LILAZUL_API_BASE}/finished-books"
     r = httpx.post(url, json=payload, timeout=10.0)
     r.raise_for_status()
     return {"ok": True, "book": r.json()}
+json()}
     
 @mcp.tool
 def book_delete_finished(book_id: str) -> dict:
@@ -194,6 +201,7 @@ def crochet_get():
 
 
 app.mount("/mcp", mcp_app)
+
 
 
 
