@@ -18,6 +18,12 @@ def crochet_mark_done(item: str) -> dict:
     crochet_status[item] = "done"
     return {"ok": True, "item": item, "status": "done"}
 
+@mcp.tool
+def crochet_list() -> dict:
+    """List all crochet items and their status."""
+    return {"ok": True, "items": crochet_status}
+
+
 mcp_app = mcp.http_app(path="/")  # lo montamos en /mcp
 
 app = FastAPI(lifespan=mcp_app.lifespan)
@@ -27,6 +33,7 @@ def root():
     return {"ok": True, "msg": "FastAPI alive + MCP mounted at /mcp 💜"}
 
 app.mount("/mcp", mcp_app)
+
 
 
 
