@@ -32,7 +32,13 @@ app = FastAPI(lifespan=mcp_app.lifespan)
 def root():
     return {"ok": True, "msg": "FastAPI alive + MCP mounted at /mcp 💜"}
 
+@app.get("/crochet")
+def crochet_web():
+    return crochet_status
+
+
 app.mount("/mcp", mcp_app)
+
 
 
 
