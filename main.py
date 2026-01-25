@@ -1,6 +1,7 @@
 import os
 from typing import Dict, Any, List, Optional
 
+import httpx
 from fastapi import FastAPI
 from fastmcp import FastMCP
 from supabase import create_client, Client
@@ -41,12 +42,16 @@ def set_status(title: str, status: str) -> Dict[str, Any]:
 
 
 def list_items() -> List[Dict[str, Any]]:
-    res = _db().table(TABLE).select("title,status,notes").execute()
+    res = _db().table(TABLE).select("id,title,status,notes").execute()
     return res.data or []
 
 
 # ---------- MCP ----------
 mcp = FastMCP("Lilazul MCP")
+
+# Si algún día cambias el backend de tu app, lo puedes apuntar aquí sin tocar código:
+LILAZUL_API_BASE = os.getenv("LILAZUL_API_BASE", "https://lilazul-api.onrender.com")
+
 
 @mcp.tool
 def ping() -> dict:
@@ -58,6 +63,7 @@ def crochet_add(item: str, status: str = "wip") -> dict:
     row = upsert_item(item, status)
     return {
         "ok": True,
+        "id": row.get("id"),
         "title": row.get(COL_TITLE, item),
         "status": row.get(COL_STATUS, status),
     }
@@ -68,6 +74,7 @@ def crochet_mark_done(item: str) -> dict:
     row = set_status(item, "done")
     return {
         "ok": True,
+        "id": row.get("id"),
         "title": row.get(COL_TITLE, item),
         "status": row.get(COL_STATUS, "done"),
     }
@@ -78,13 +85,32 @@ def crochet_list() -> dict:
     return {"ok": True, "items": list_items()}
 
 
+@mcp.tool
+def crochet_toggle(id: str) -> dict:
+    """
+    Toggle status using the SAME endpoint your web app uses:
+    PATCH /crochet/{id}/toggle on lilazul-api.onrender.com
+    """
+    url = f"{LILAZUL_API_BASE}/crochet/{id}/toggle"
+    r = httpx.patch(url, timeout=10.0)
+    r.raise_for_status()
+    # devolvemos respuesta si viene JSON
+    try:
+        data = r.json()
+    except Exception:
+        data = None
+    return {"ok": True, "id": id, "api_status": r.status_code, "response": data}
+
+
 # ---------- FastAPI ----------
 mcp_app = mcp.http_app(path="/")
 app = FastAPI(lifespan=mcp_app.lifespan)
 
+
 @app.get("/")
 def root():
     return {"ok": True, "msg": "Lilazul API + MCP 💜"}
+
 
 # ESTE endpoint lo usa tu UI
 @app.post("/crochet")
@@ -98,16 +124,10 @@ def crochet_post(payload: Dict[str, Any]):
     upsert_item(str(title), str(status))
     return {"ok": True}
 
+
 @app.get("/crochet")
 def crochet_get():
     return {"ok": True, "items": list_items()}
 
+
 app.mount("/mcp", mcp_app)
-
-
-
-
-
-
-
-
