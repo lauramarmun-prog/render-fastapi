@@ -1,3 +1,5 @@
+from typing import Dict
+
 from fastapi import FastAPI
 from fastmcp import FastMCP
 
@@ -8,7 +10,15 @@ def ping() -> dict:
     """Simple health check tool to verify MCP calls work."""
     return {"ok": True, "pong": "💜"}
 
-mcp_app = mcp.http_app(path="/")  # path="/" porque lo vamos a montar en /mcp
+crochet_status: Dict[str, str] = {}
+
+@mcp.tool
+def crochet_mark_done(item: str) -> dict:
+    """Mark a crochet item as finished."""
+    crochet_status[item] = "done"
+    return {"ok": True, "item": item, "status": "done"}
+
+mcp_app = mcp.http_app(path="/")  # lo montamos en /mcp
 
 app = FastAPI(lifespan=mcp_app.lifespan)
 
@@ -17,6 +27,7 @@ def root():
     return {"ok": True, "msg": "FastAPI alive + MCP mounted at /mcp 💜"}
 
 app.mount("/mcp", mcp_app)
+
 
 
 
