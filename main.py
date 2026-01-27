@@ -168,6 +168,37 @@ def book_delete_finished(book_id: str) -> dict:
     r = httpx.delete(url, timeout=10.0)
     r.raise_for_status()
     return {"ok": True, "id": book_id}
+@mcp.tool
+def cake_get(month: str | None = None) -> dict:
+    """
+    Lee la tarta:
+    - si pasas month="YYYY-MM" -> ese mes
+    - si no pasas month -> la más reciente
+    """
+    url = f"{LILAZUL_API_BASE}/cake"
+    if month:
+        url += f"?month={month}"
+    r = httpx.get(url, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "data": r.json()}
+
+
+@mcp.tool
+def cake_set(month: str, name: str = "", note: str = "", photo_url: str = "") -> dict:
+    """
+    Guarda/actualiza la tarta del mes (upsert por month).
+    month debe ser "YYYY-MM" (ej: "2026-02").
+    """
+    payload = {
+        "month": month,
+        "name": name,
+        "note": note,
+        "photo_url": photo_url,
+    }
+    url = f"{LILAZUL_API_BASE}/cake"
+    r = httpx.put(url, json=payload, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "data": r.json()}
 
 
 
@@ -200,6 +231,7 @@ def crochet_get():
 
 
 app.mount("/mcp", mcp_app)
+
 
 
 
