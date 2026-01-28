@@ -199,6 +199,14 @@ def cake_set(month: str, name: str = "", note: str = "", photo_url: str = "") ->
     r = httpx.put(url, json=payload, timeout=10.0)
     r.raise_for_status()
     return {"ok": True, "data": r.json()}
+    
+@mcp.tool
+def cake_delete(cake_id: str) -> dict:
+    """Borra una tarta del historial por su ID."""
+    url = f"{LILAZUL_API_BASE}/cakes/{cake_id}"
+    r = httpx.delete(url, timeout=10.0)
+    r.raise_for_status()
+    return {"ok": True, "id": cake_id}
 
 
 
@@ -231,6 +239,7 @@ def crochet_get():
 
 
 app.mount("/mcp", mcp_app)
+
 
 
 
