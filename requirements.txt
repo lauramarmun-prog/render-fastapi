@@ -1,7 +1,8 @@
 fastapi
 uvicorn[standard]
 fastmcp
-supabase
+supabase>=2.0.0
 httpx
+python-dotenv
 
 
