@@ -211,12 +211,25 @@ def cake_get(month: str | None = None) -> dict:
     return {"ok": True, "data": r.json()}
 
 @mcp.tool
-def cake_set(month: str, name: str = "", note: str = "", photo_url: str = "") -> dict:
-    payload = {"month": month, "name": name, "note": note, "photo_url": photo_url}
+def cake_set(
+    month: str,
+    name: str = "",
+    note: str = "",
+    photo_url: str = "",
+    recipe: str = ""
+) -> dict:
+    payload = {
+        "month": month,
+        "name": name,
+        "note": note,
+        "photo_url": photo_url,
+        "recipe": recipe
+    }
     url = f"{LILAZUL_API_BASE}/cake"
     r = httpx.put(url, json=payload, timeout=10.0)
     r.raise_for_status()
     return {"ok": True, "data": r.json()}
+
 
 @mcp.tool
 def cake_delete(cake_id: str) -> dict:
@@ -264,6 +277,7 @@ def crochet_get():
 
 # MCP mount
 app.mount("/mcp", mcp_app)
+
 
 
 
